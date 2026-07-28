@@ -9,14 +9,22 @@ use Kurt\Modules\Loyalty\Enums\CardStatus;
 use Kurt\Modules\Loyalty\Models\Card;
 use Kurt\Modules\Loyalty\Models\Program;
 use Kurt\Modules\Loyalty\Models\Stamp;
+use Kurt\Modules\Loyalty\Support\Concerns\ResolvesLoyaltyCache;
 
 /**
  * Aggregate loyalty metrics for reporting: card issuance, stamps granted, and
  * reward earn/redeem funnels, overall and broken down per program. All figures
  * come from a handful of grouped aggregate queries (no per-program N+1).
+ *
+ * These are read-only REPORTING aggregates, so the result is memoized through
+ * the shared module cache scoped by the caller's report parameters. Minor
+ * staleness is acceptable and bounded by `loyalty.cache.ttl`; the cache is
+ * never consulted for live balances or any accrual/redemption decision.
  */
 final class LoyaltyStatsService
 {
+    use ResolvesLoyaltyCache;
+
     /**
      * @return array{
      *     range: array{since: string|null, until: string|null},
@@ -28,6 +36,32 @@ final class LoyaltyStatsService
         ?int $programId = null,
         ?Carbon $since = null,
         ?Carbon $until = null,
+    ): array {
+        $key = sprintf(
+            'stats:overview:%s:%s:%s',
+            $programId ?? 'all',
+            $since?->toIso8601String() ?? 'all',
+            $until?->toIso8601String() ?? 'all',
+        );
+
+        /** @var array{range: array{since: string|null, until: string|null}, totals: array<string, int|float>, programs: array<int, array<string, mixed>>} */
+        return $this->loyaltyCache()->remember(
+            $key,
+            fn (): array => $this->computeOverview($programId, $since, $until),
+        );
+    }
+
+    /**
+     * @return array{
+     *     range: array{since: string|null, until: string|null},
+     *     totals: array<string, int|float>,
+     *     programs: array<int, array<string, mixed>>
+     * }
+     */
+    private function computeOverview(
+        ?int $programId,
+        ?Carbon $since,
+        ?Carbon $until,
     ): array {
         $cardAgg = $this->cardAggregates($programId, $since, $until);
         $stampAgg = $this->stampAggregates($programId, $since, $until);
