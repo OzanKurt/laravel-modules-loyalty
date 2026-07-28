@@ -123,6 +123,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Module cache convention (Core ModuleCacheFactory)
+    |--------------------------------------------------------------------------
+    | Config-driven cache scoped by the `loyalty` prefix, resolved via
+    | Kurt\Modules\Core\Support\ModuleCacheFactory->for('loyalty'). This wraps
+    | ONLY safe read-only REPORTING aggregates (the stats overview) so minor
+    | staleness is acceptable and bounded by the TTL. Live wallet balances,
+    | stamp counts, and any value that authorises an accrual or redemption are
+    | NEVER served from this cache. `store` is selected by name (null = default
+    | store) so `config:cache` stays safe.
+    */
+    'cache' => [
+        'enabled' => (bool) env('LOYALTY_CACHE_ENABLED', true),
+        'store' => env('LOYALTY_CACHE_STORE'),
+        'prefix' => 'loyalty',
+        'ttl' => (int) env('LOYALTY_CACHE_TTL', 3600),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Wallet passes
     |--------------------------------------------------------------------------
     | Apple + Google are opt-in and only render "Add to wallet" buttons once the
