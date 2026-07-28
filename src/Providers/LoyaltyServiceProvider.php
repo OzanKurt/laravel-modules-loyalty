@@ -28,7 +28,7 @@ final class LoyaltyServiceProvider extends PackageServiceProvider
         return 'loyalty';
     }
 
-    protected function moduleManifest(): ?ModuleManifest
+    protected function moduleManifest(): ModuleManifest
     {
         return ModuleManifest::make('loyalty')
             ->name('Loyalty')
