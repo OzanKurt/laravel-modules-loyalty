@@ -2,7 +2,17 @@
 
 All notable changes to `ozankurt/laravel-modules-loyalty` will be documented in this file.
 
-## Unreleased
+## v2.0.0
+
+### Breaking changes
+- Requires PHP 8.4+ (drops PHP 8.3).
+- Requires Laravel 13 (drops Laravel 12).
+- Requires `ozankurt/laravel-modules-core` ^2.0.
+- Test suite runs on Pest 5 / Testbench 11.
+
+No loyalty behaviour changed: stamps, tiers, vouchers, redemption, expiry, wallet
+passes and the `LoyaltyStatsService` cache boundary (report cached by TTL, live
+card balances never cached) are byte-for-byte identical and pass unmodified.
 
 ### Added (feature round)
 - **Multi-tier rewards.** New `loyalty_program_tiers` table + `ProgramTier` model (`Program hasMany tiers`). When a program defines tiers, each crossed absolute `threshold` earns that tier's reward and fires a `TierReached` event (plus `CardCompleted`). Programs with no tier rows are unchanged (single repeating `stamps_required` threshold, rollover crediting preserved).
