@@ -1,8 +1,15 @@
 # KurtModules Loyalty
 
+[![tests](https://github.com/OzanKurt/laravel-modules-loyalty/actions/workflows/tests.yml/badge.svg)](https://github.com/OzanKurt/laravel-modules-loyalty/actions/workflows/tests.yml)
+
 Digital loyalty / stamp-card system for Laravel apps — collect stamps, earn rewards, redeem them, with a public card page, QR-based granting, and Apple/Google Wallet passes.
 
 Part of the [KurtModules](https://github.com/OzanKurt) family. Requires `ozankurt/laravel-modules-core`.
+
+## Requirements
+
+- PHP `^8.4`
+- Laravel `^13.0`
 
 ## A deliberate departure from the family
 
@@ -124,6 +131,19 @@ Schedule::command('loyalty:expire')->daily();
 ```
 
 See [`docs/superpowers/specs`](docs/superpowers/specs) for the full design and [`docs/superpowers/plans`](docs/superpowers/plans) for the build plan.
+
+## Testing
+
+```bash
+composer install
+vendor/bin/pint --test
+vendor/bin/phpstan analyse --memory-limit=2G
+vendor/bin/pest
+```
+
+CI runs the same checks on every push and pull request
+(`.github/workflows/tests.yml`), against PHP 8.4 / Laravel 13. Static analysis
+is held at **PHPStan level 8**; the suite runs on **Pest 5**.
 
 ## License
 
